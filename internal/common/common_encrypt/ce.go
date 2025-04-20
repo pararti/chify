@@ -14,9 +14,9 @@ func GetActionButton() (*widget.Check, *widget.Button) {
 
 	modeToggle.OnChanged = func(checked bool) {
 		if checked {
-			actionButton.SetText(lang.L("Encrypt"))
-		} else {
 			actionButton.SetText(lang.L("Decrypt"))
+		} else {
+			actionButton.SetText(lang.L("Encrypt"))
 		}
 	}
 
