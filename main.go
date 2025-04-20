@@ -33,10 +33,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create tab container with aes mode default
-	tabs := container.NewAppTabs(
-		container.NewTabItem("aes", container.NewScroll(registry.DefaultService.BuildForm())),
-	)
+	// Use DocTabs for closable tabs
+	tabs := container.NewDocTabs()
+
+	// Add initial tab
+	initialTab := container.NewTabItem("aes", container.NewScroll(registry.DefaultService.BuildForm()))
+	tabs.Append(initialTab)
+	tabs.Select(initialTab)
+
 	tabs.SetTabLocation(container.TabLocationTop)
 
 	accordingItems := make([]*widget.AccordionItem, 0, len(registry.LeftServiceMenu))
@@ -47,12 +51,12 @@ func main() {
 				for _, subMenuEl := range menuEl.Elements {
 					button := widget.NewButton(subMenuEl.Name, func() {
 						form := subMenuEl.Service.BuildForm()
-						if len(tabs.Items) > 0 {
-							tabs.Items[tabs.SelectedIndex()].Text = subMenuEl.Name
-							tabs.Items[tabs.SelectedIndex()].Content = container.NewScroll(form)
+						// Update the *selected* tab's content and title
+						if selectedTab := tabs.Selected(); selectedTab != nil {
+							selectedTab.Text = subMenuEl.Name
+							selectedTab.Content = container.NewScroll(form)
 							tabs.Refresh()
 						}
-
 					})
 					buttonsBox.Add(button)
 				}
@@ -66,13 +70,10 @@ func main() {
 
 	// Add new tab button again with default aes mode
 	newTabButton := widget.NewButton("+", func() {
-		tabCount := len(tabs.Items)
 		tabContent := container.NewScroll(registry.DefaultService.BuildForm())
-		tabs.Append(container.NewTabItem(
-			"aes",
-			tabContent,
-		))
-		tabs.SelectIndex(tabCount)
+		newTab := container.NewTabItem("aes", tabContent)
+		tabs.Append(newTab)
+		tabs.Select(newTab)
 	})
 
 	tabHeader := container.NewBorder(nil, nil, nil, newTabButton, tabs)
